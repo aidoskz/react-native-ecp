@@ -1,9 +1,26 @@
 #import "Ecp.h"
 
+#if __has_include(<React/RCTConvert.h>)
+#import <React/RCTConvert.h>
+#import <React/RCTBridge.h>
+#else // back compatibility for RN version < 0.40
+#import "RCTConvert.h"
+#import "RCTBridge.h"
+#endif
 
 @implementation Ecp
 
++ (BOOL)requiresMainQueueSetup {
+    return NO;
+}
+
+- (dispatch_queue_t)methodQueue
+{
+    return dispatch_get_main_queue();
+}
+
 RCT_EXPORT_MODULE()
+
 
 RCT_EXPORT_METHOD(sampleMethod:(NSString *)stringArgument numberParameter:(nonnull NSNumber *)numberArgument callback:(RCTResponseSenderBlock)callback)
 {
