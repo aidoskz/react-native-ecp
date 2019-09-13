@@ -1,7 +1,7 @@
 {
   "name": "react-native-ecp",
   "title": "React Native Ecp",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "React Natitve ECP - Электронная Цифровая Подпись",
   "main": "index.js",
   "scripts": {
