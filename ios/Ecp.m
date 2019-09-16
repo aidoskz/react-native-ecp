@@ -49,20 +49,26 @@ RCT_EXPORT_METHOD(signData:(NSString *)certpath withCertpass:(NSString *)certpas
  ENGINE_load_gost();
  ERR_load_crypto_strings();
 
-    NSLog(@"Sign Base 64");
+  
+    //  NSLog(@"PATH: %@ PASS: %@", certpath ,certpass);
+    //  NSLog(@"Sign Base 64");
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    
     NSString *basePath = ([paths count] > 0) ? [paths objectAtIndex:0] : nil;
     
-    NSString *pkcs12_path = [[NSBundle bundleForClass:[self class]] pathForResource:@"RSA256_eb6205008e346d10d3993a756e79c425dabab881" ofType:@"p12"];
+    NSString *pkcs12_path = [[NSBundle bundleWithPath:basePath] pathForResource:@"RSA256_eb6205008e346d10d3993a756e79c425dabab881" ofType:@"p12"];
     
-    NSData *xmlData = [NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"test" ofType:@"xml"]];
-    if(!xmlData) {
-        NSLog(@"Xml was not loaded");
-    }
-    unsigned char *cXml = (unsigned char*)malloc(xmlData.length);
-    [xmlData getBytes:cXml length:xmlData.length];
-    cXml[xmlData.length] = 0x0;
-    NSLog(@"original xml = %s", cXml);
+    //  NSData *xmlData = [NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"test" ofType:@"xml"]];
+    //  if(!xmlData) {
+    //    NSLog(@"Xml was not loaded");
+    //  }
+    
+    unsigned char *cXml = (unsigned char *) [data UTF8String];
+    //  NSData *xmlData = @"<data>123</data>";
+    //  unsigned char *cXml = (unsigned char*)malloc(xmlData.length);
+    //  [xmlData getBytes:cXml length:xmlData.length];
+    //  cXml[xmlData.length] = 0x0;
+    //  NSLog(@"original xml = %s", cXml);
     
     
     xmlDocPtr doc = NULL;
@@ -75,7 +81,7 @@ RCT_EXPORT_METHOD(signData:(NSString *)certpath withCertpass:(NSString *)certpas
     int err;
     
     STACK_OF(X509) *ca = NULL;
-    NSLog(@"PKCS#12: %@", pkcs12_path);
+    //  NSLog(@"PKCS#12: %@", pkcs12_path);
     if([[NSFileManager defaultManager] fileExistsAtPath:pkcs12_path]) {
         NSLog(@"ok, pfile exists!");
     } else {
@@ -90,10 +96,6 @@ RCT_EXPORT_METHOD(signData:(NSString *)certpath withCertpass:(NSString *)certpas
         ERR_print_errors_fp(stderr);
     }
     
-//    NSLog(@"P12 =  %s", p12);
-//    
-//    printf(p12);
-    
     if (!PKCS12_parse(p12, "aidos123", &pkey, &cert, &ca)) { //Error at parsing or password error
         fprintf(stderr, "Error parsing PKCS#12 file\n");
         ERR_print_errors_fp(stderr);
@@ -104,23 +106,15 @@ RCT_EXPORT_METHOD(signData:(NSString *)certpath withCertpass:(NSString *)certpas
     unsigned char *pem;
     buf = NULL;
     len = i2d_X509(cert, &buf);
-    NSLog(@"CERTBUFFER %s\n\n", buf);
     pem = base64encode(buf, len);
-    NSLog(@"pem = %s\n\n", pem);
+    //  NSLog(@"pem = %s\n\n", pem);
     
     PKCS12_free(p12);
-    
-    
-    
-    
-    
-    
     
     doc = xmlParseDoc(cXml);
     xmlChar* c14nXML = NULL;
     xmlC14NDocDumpMemory(doc, NULL, 0, NULL, 0, &c14nXML);
     int c14nXMLLen = strlen((char*)c14nXML);
-    printf(c14nXML);
     
     EVP_MD_CTX *mdCtx;
     EVP_MD *md;
@@ -150,7 +144,7 @@ RCT_EXPORT_METHOD(signData:(NSString *)certpath withCertpass:(NSString *)certpas
     EVP_MD_CTX_cleanup(mdCtx);
     
     char *base64Digest = base64encode(cHash, cHashLen);
-    NSLog(@"Encoded hash: %s", base64Digest);
+    //  NSLog(@"Encoded hash: %s", base64Digest);
     
     xmlXPathContextPtr xpathCtx;
     xmlXPathObjectPtr xpathObj;
@@ -188,8 +182,8 @@ RCT_EXPORT_METHOD(signData:(NSString *)certpath withCertpass:(NSString *)certpas
     xmlXPathFreeContext(xpathCtx);
     
     int c14nSInfoLen = strlen((char*)c14nSInfo);
-    NSLog(@"Canonicalized SignedInfo = %s", c14nSInfo);
-    NSLog(@"key size = %d", EVP_PKEY_size(pkey));
+    //  NSLog(@"Canonicalized SignedInfo = %s", c14nSInfo);
+    //  NSLog(@"key size = %d", EVP_PKEY_size(pkey));
     
     // подписываем
     unsigned char *cSignature = (unsigned char*)malloc(EVP_PKEY_size(pkey));
@@ -200,12 +194,12 @@ RCT_EXPORT_METHOD(signData:(NSString *)certpath withCertpass:(NSString *)certpas
     
     // вообще, так надо проверять каждую функцию библиотеки провайдера
     // и что-то предпринимать
-//    if (err != 1) {
-//        ERR_print_errors_fp(stderr);
-//    }
+    if (err != 1) {
+        ERR_print_errors_fp(stderr);
+    }
     
     char *base64Signature = base64encode(cSignature, sigLen);
-    NSLog(@"Encoded signature: %s", base64Signature);
+    //  NSLog(@"Encoded signature: %s", base64Signature);
     
     
     //    // BASE64 SIGN
@@ -242,21 +236,20 @@ RCT_EXPORT_METHOD(signData:(NSString *)certpath withCertpass:(NSString *)certpas
     sigValEl = xmlNewChild(signEl, signNS, BAD_CAST "SignatureValue", BAD_CAST base64Signature);
     kInfoEl = xmlNewChild(signEl, signNS, BAD_CAST "KeyInfo", NULL);
     x509DataEl = xmlNewChild(kInfoEl, signNS, BAD_CAST "X509Data", NULL);
-    NSLog(@"CERTIFICATE %s" , pem);
+    //  NSLog(@"CERTIFICATE %s" , pem);
     x509CertEl = xmlNewChild(x509DataEl, signNS, BAD_CAST "X509Certificate", BAD_CAST pem);
-    
-    NSLog(@"XML CERT %s", signEl);
+    //
+    //  NSLog(@"XML CERT %s", signEl);
     
     // выдаем подписанный xml
     xmlChar *outXML;
     int outXMLSize;
     xmlDocDumpMemoryEnc(doc, &outXML, &outXMLSize, "UTF-8");
-    NSLog(@"signed xml = %s", outXML);
-    
+    //  NSLog(@"signed xml = %s", outXML);
     // сохраняем в файл
     NSData *signedXML = [NSData dataWithBytes:outXML length:outXMLSize];
     NSString *signedXMLPath = [basePath stringByAppendingString:@"/signedXML.xml"];
-    NSLog(signedXMLPath);
+    //  NSLog(signedXMLPath);
     [signedXML writeToFile:signedXMLPath atomically:NO];
     
     xmlFreeDoc(doc);
@@ -266,7 +259,10 @@ RCT_EXPORT_METHOD(signData:(NSString *)certpath withCertpass:(NSString *)certpas
     X509_free(cert);
     EVP_MD_CTX_destroy(mdCtx);
     ERR_free_strings();
-    callback(@[[NSNull null], certpath,certpass]);
+    //        EVP_cleanup(); вызываем только, когда абсолютно все завершили
+    //  callback(@[[NSNull null], [NSNumber numberWithInt:(1*2)]]);
+    callback(@[[NSNull null], [NSString stringWithUTF8String:pem], paths ]);
+//    callback(@[[NSNull null], signedXML, pem ]);
 }
 
 

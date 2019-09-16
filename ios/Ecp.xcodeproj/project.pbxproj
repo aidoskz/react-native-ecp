@@ -31,8 +31,6 @@
 		2B0116C3232A6AA100413E95 /* libssl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libssl.a; path = lib/libssl.a; sourceTree = "<group>"; };
 		2B0116C4232A6AA100413E95 /* libcrypto.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcrypto.a; path = lib/libcrypto.a; sourceTree = "<group>"; };
 		2BA5B022232F43C1009E1AA8 /* libxml2.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.2.dylib; path = ../../../../../../../usr/lib/libxml2.2.dylib; sourceTree = "<group>"; };
-		2BDA1748232A5B340031EA15 /* libcrypto.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcrypto.a; path = openssl/libcrypto.a; sourceTree = "<group>"; };
-		2BDA1749232A5B340031EA15 /* libssl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libssl.a; path = openssl/libssl.a; sourceTree = "<group>"; };
 		2BDA174C232A5B750031EA15 /* Base64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Base64.h; sourceTree = "<group>"; };
 		2BDA174D232A5B750031EA15 /* Base64.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Base64.c; sourceTree = "<group>"; };
 		B3E7B5881CC2AC0600A0062D /* Ecp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Ecp.h; sourceTree = "<group>"; };
@@ -67,8 +65,6 @@
 				2BA5B022232F43C1009E1AA8 /* libxml2.2.dylib */,
 				2B0116C4232A6AA100413E95 /* libcrypto.a */,
 				2B0116C3232A6AA100413E95 /* libssl.a */,
-				2BDA1748232A5B340031EA15 /* libcrypto.a */,
-				2BDA1749232A5B340031EA15 /* libssl.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -263,8 +259,8 @@
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					"$(SRCROOT)/../../../React/**",
 					"$(SRCROOT)/../../react-native/React/**",
-					"$(SRCROOT)/lib/include",
 					"$(SDKROOT)/usr/include/libxml2",
+					"$(SRCROOT)/lib/include",
 				);
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks $(inherited)";
 				LIBRARY_SEARCH_PATHS = (
@@ -273,12 +269,7 @@
 				);
 				"MTL_ENABLE_DEBUG_INFO[arch=*]" = "";
 				MTL_FAST_MATH = YES;
-				OTHER_CFLAGS = (
-					"$(OTHER_CFLAGS)",
-					"-lssl",
-					"-lcrypto",
-					"-lxml2.2",
-				);
+				OTHER_CFLAGS = "$(OTHER_CFLAGS)";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = Ecp;
 				SKIP_INSTALL = YES;
@@ -294,8 +285,8 @@
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					"$(SRCROOT)/../../../React/**",
 					"$(SRCROOT)/../../react-native/React/**",
-					"$(SRCROOT)/lib/include",
 					"$(SDKROOT)/usr/include/libxml2",
+					"$(SRCROOT)/lib/include",
 				);
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks $(inherited)";
 				LIBRARY_SEARCH_PATHS = (
@@ -303,12 +294,7 @@
 					"$(PROJECT_DIR)/lib",
 				);
 				MTL_FAST_MATH = YES;
-				OTHER_CFLAGS = (
-					"$(OTHER_CFLAGS)",
-					"-lssl",
-					"-lcrypto",
-					"-lxml2.2",
-				);
+				OTHER_CFLAGS = "$(OTHER_CFLAGS)";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = Ecp;
 				SKIP_INSTALL = YES;
