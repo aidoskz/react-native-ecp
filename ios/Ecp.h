@@ -20,6 +20,25 @@
 #include "libxml/xpath.h"
 #include "libxml/xpathInternals.h"
 
+
+#include <string.h>
+#include <stdio.h>
+#include <errno.h>
+#include <time.h>
+#include <unistd.h>
+
+#include <openssl/cms.h>
+#include <openssl/engine.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+#include <openssl/evp.h>
+#include <openssl/conf.h>
+#include <openssl/pkcs12.h>
+#include <openssl/pem.h>
+#include <openssl/comp.h>
+#include <openssl/x509.h>
+#include <openssl/x509v3.h>
+
 #include "Base64.h"
 
 

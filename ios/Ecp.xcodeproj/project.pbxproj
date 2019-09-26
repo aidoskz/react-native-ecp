@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2B7FBEEA2338EB9E00672446 /* libcrypto.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B7FBEE82338EB9E00672446 /* libcrypto.a */; };
-		2B7FBEEB2338EB9E00672446 /* libssl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B7FBEE92338EB9E00672446 /* libssl.a */; };
+		2B7FBF21233B786B00672446 /* libssl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B7FBF1F233B786B00672446 /* libssl.a */; };
+		2B7FBF22233B786B00672446 /* libcrypto.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B7FBF20233B786B00672446 /* libcrypto.a */; };
 		2BDA174E232A5B750031EA15 /* Base64.c in Sources */ = {isa = PBXBuildFile; fileRef = 2BDA174D232A5B750031EA15 /* Base64.c */; };
 		B3E7B58A1CC2AC0600A0062D /* Ecp.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* Ecp.m */; };
 /* End PBXBuildFile section */
@@ -27,8 +27,8 @@
 
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libEcp.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libEcp.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		2B7FBEE82338EB9E00672446 /* libcrypto.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcrypto.a; path = "openssl-1.0.1m-arm64/libcrypto.a"; sourceTree = "<group>"; };
-		2B7FBEE92338EB9E00672446 /* libssl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libssl.a; path = "openssl-1.0.1m-arm64/libssl.a"; sourceTree = "<group>"; };
+		2B7FBF1F233B786B00672446 /* libssl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libssl.a; sourceTree = "<group>"; };
+		2B7FBF20233B786B00672446 /* libcrypto.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libcrypto.a; sourceTree = "<group>"; };
 		2BDA174C232A5B750031EA15 /* Base64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Base64.h; sourceTree = "<group>"; };
 		2BDA174D232A5B750031EA15 /* Base64.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Base64.c; sourceTree = "<group>"; };
 		B3E7B5881CC2AC0600A0062D /* Ecp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Ecp.h; sourceTree = "<group>"; };
@@ -40,8 +40,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2B7FBEEA2338EB9E00672446 /* libcrypto.a in Frameworks */,
-				2B7FBEEB2338EB9E00672446 /* libssl.a in Frameworks */,
+				2B7FBF21233B786B00672446 /* libssl.a in Frameworks */,
+				2B7FBF22233B786B00672446 /* libcrypto.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -59,8 +59,8 @@
 		2BDA1747232A5B330031EA15 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				2B7FBEE82338EB9E00672446 /* libcrypto.a */,
-				2B7FBEE92338EB9E00672446 /* libssl.a */,
+				2B7FBF20233B786B00672446 /* libcrypto.a */,
+				2B7FBF1F233B786B00672446 /* libssl.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -189,7 +189,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
-				ONLY_ACTIVE_ARCH = NO;
+				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 			};
 			name = Debug;
@@ -235,6 +235,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
+				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -254,7 +255,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/openssl-1.0.1m-x86_64",
+					"$(PROJECT_DIR)",
 				);
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "-ObjC";
@@ -277,7 +278,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/openssl-1.0.1m-arm64",
+					"$(PROJECT_DIR)",
 				);
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "-ObjC";
