@@ -4,8 +4,13 @@
 #import "RCTBridgeModule.h"
 #endif
 
-@import UIKit;
+#import <UIKit/UIKit.h>
 
+#include <string.h>
+#include <stdio.h>
+#include <time.h>
+#include <errno.h>
+#include <unistd.h>
 
 
 #include <openssl/engine.h>
@@ -13,31 +18,26 @@
 #include <openssl/evp.h>
 #include <openssl/pkcs12.h>
 #include <openssl/x509.h>
-
-#include <libxml/parser.h>
-#include <libxml/tree.h>
-#include "libxml/c14n.h"
-#include "libxml/xpath.h"
-#include "libxml/xpathInternals.h"
-
-
-#include <string.h>
-#include <stdio.h>
-#include <errno.h>
-#include <time.h>
-#include <unistd.h>
-
+#include <openssl/ocsp.h>
 #include <openssl/cms.h>
-#include <openssl/engine.h>
 #include <openssl/ssl.h>
-#include <openssl/err.h>
 #include <openssl/evp.h>
 #include <openssl/conf.h>
-#include <openssl/pkcs12.h>
 #include <openssl/pem.h>
 #include <openssl/comp.h>
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
+#include <openssl/bn.h>
+#include <openssl/asn1.h>
+#include <openssl/bio.h>
+#include <openssl/ts.h>
+
+
+
+#define openssl_fdset(a,b) FD_SET((unsigned int)a, b)
+
+
+#define MAX_VALIDITY_PERIOD (5 * 60)
 
 #include "Base64.h"
 
