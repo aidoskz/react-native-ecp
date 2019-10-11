@@ -257,7 +257,7 @@ RCT_EXPORT_METHOD(sampleMethod: (NSString *)certpath withCertpass: (NSString *)c
     NSMutableString *signature = [NSMutableString string];
     for (NSTextCheckingResult* match in matches) {
         NSString* matchText = [content substringWithRange:[match range]];
-        NSLog(@"match: %@", matchText);
+//        NSLog(@"match: %@", matchText);
         [signature appendString:matchText];
         if([matchText hasSuffix:@"=="]){
             break;
