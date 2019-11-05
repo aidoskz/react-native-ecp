@@ -171,12 +171,29 @@ RCT_EXPORT_METHOD(sampleMethod: (NSString *)certpath withCertpass: (NSString *)c
     BIO *dataforsign = BIO_new(BIO_s_mem()); //If you want input data not from fs
     BIO_puts(dataforsign, inputData);
     //    BIO_puts(data, inputData);
+    
 
     /* Sign content */
     cms = CMS_sign(cert, pkey, NULL, dataforsign, flags);
+    
+    NSError *errorWithFile;
+    NSString *stringToWrite = @"1\n2\n3\n4";
+    NSString *filePath = [[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject] stringByAppendingPathComponent:@"smout.txt"];
+    [stringToWrite writeToFile:filePath atomically:YES encoding:NSUTF8StringEncoding error:&errorWithFile];
 
     NSString *smoutPaths = [[NSBundle bundleWithPath:basePath] pathForResource:@"smout" ofType:@"txt"];
-    out = BIO_new_file([smoutPaths UTF8String], "w");
+    
+   
+//    NSError *errorWithfile;
+//    NSString *stringToWrite = @"w";
+//    [stringToWrite writeToFile:smoutPaths atomically:YES encoding:NSUTF8StringEncoding error:&errorWithfile];
+//
+    if(errorWithFile){
+        NSLog(@"ERRORWITHFILE ");
+        NSLog(errorWithFile);
+    }
+    NSLog(@"SMOUT %s", [filePath UTF8String]);
+    out = BIO_new_file([filePath UTF8String], "w");
 
     int  cmsLen = sizeof(cms);
     if (!(flags & CMS_STREAM))
@@ -220,7 +237,7 @@ RCT_EXPORT_METHOD(sampleMethod: (NSString *)certpath withCertpass: (NSString *)c
     EVP_SignUpdate (&md_ctx, dataEncoded, dataLen);
     sig_len = sizeof(sig_buf);
 
-    if (EVP_SignFinal (&md_ctx, sig_buf, &sig_len, key) != 1) {
+    if (EVP_SignFinal (&md_ctx, data2, &dataLen, key) != 1) {
         ERR_print_errors_fp(stderr);
     }
 
@@ -240,7 +257,7 @@ RCT_EXPORT_METHOD(sampleMethod: (NSString *)certpath withCertpass: (NSString *)c
 
     NSLog(@"CMS: %s" , ci);
     
-    NSString *content = [NSString stringWithContentsOfFile:smoutPaths
+    NSString *content = [NSString stringWithContentsOfFile:filePath
                                                   encoding:NSASCIIStringEncoding
                                                      error:NULL];
     // maybe for debugging...
@@ -328,26 +345,22 @@ errors:
 
     CMS_ContentInfo_free(ci);
 
-    EVP_PKEY_free(pkey);
-
-
     BIO_free(dataforsign);
     ERR_print_errors_fp(stderr);
 
     ERR_remove_state(/* pid= */ 0);
-    //    ENGINE_cleanup();
+    ENGINE_cleanup();
     CONF_modules_unload(/* all= */ 1);
-    //    EVP_cleanup();
+    EVP_cleanup();
     ERR_free_strings();
     CRYPTO_cleanup_all_ex_data();
     NSLog(@"generate signature pkcs11 complete!!!");
     
-    
     EVP_PKEY_free(pkey);
     X509_free(cert);
-    //EVP_MD_CTX_destroy(mdCt   x);
+    EVP_MD_CTX_destroy(md_ctx);
     ERR_free_strings();
-    //        EVP_cleanup(); вызываем только, когда абсолютно все завершили
+    //EVP_cleanup(); //вызываем только, когда абсолютно все завершили
     //  callback(@[[NSNull null], [NSNumber numberWithInt:(1*2)]]);
     //callback(@[[NSNull null], [NSString stringWithUTF8String:pem], paths ]);
     NSString *result = [NSString stringWithString:signature];
