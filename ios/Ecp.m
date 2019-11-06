@@ -10,6 +10,18 @@
 
 @implementation Ecp
 
+- (instancetype)init {
+    OpenSSL_add_all_algorithms();
+    ENGINE_load_gost();
+    ERR_load_crypto_strings();
+    SSL_load_error_strings();
+    OPENSSL_config(NULL);
+    ENGINE_load_openssl();
+    ENGINE_register_all_pkey_asn1_meths();
+    SSL_library_init();
+    return self;
+}
+
 + (BOOL)requiresMainQueueSetup {
     return NO;
 }
@@ -84,14 +96,6 @@ RCT_EXPORT_METHOD(listDocument: (RCTResponseSenderBlock)callback)
 
 RCT_EXPORT_METHOD(sampleMethod: (NSString *)certpath withCertpass: (NSString *)certpass withData: (NSString *) data: (RCTResponseSenderBlock)errorcallback: (RCTResponseSenderBlock)callback) {
     
-    OpenSSL_add_all_algorithms();
-    ENGINE_load_gost();
-    ERR_load_crypto_strings();
-    SSL_load_error_strings();
-    OPENSSL_config(NULL);
-    ENGINE_load_openssl();
-    ENGINE_register_all_pkey_asn1_meths();
-    SSL_library_init();
     //  NSLog(@"PATH: %@ PASS: %@", certpath ,certpass);
     //  NSLog(@"Sign Base 64");
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
@@ -126,8 +130,12 @@ RCT_EXPORT_METHOD(sampleMethod: (NSString *)certpath withCertpass: (NSString *)c
      * non-detached set CMS_STREAM
      */
     int flags = CMS_DETACHED | CMS_STREAM;
+    
+    BIO *dataforsign = BIO_new(BIO_s_mem()); //If you want input data not from fs
+    BIO_puts(dataforsign, inputData);
+    //    BIO_puts(data, inputData);
 
-
+    NSError  *error = nil;
     /* Read in signer certificate and private key */
     NSString *certPaths = [[NSBundle bundleWithPath:basePath] pathForResource:certpath ofType:@"p12"];
 
@@ -135,7 +143,6 @@ RCT_EXPORT_METHOD(sampleMethod: (NSString *)certpath withCertpass: (NSString *)c
     PKCS12 *p12;
     EVP_PKEY *pkey;
     int err;
-
     STACK_OF(X509) *ca = NULL;
     NSLog(@"PKCS#12: %@", pkcs12_path);
     if([[NSFileManager defaultManager] fileExistsAtPath:pkcs12_path]) {
@@ -155,8 +162,25 @@ RCT_EXPORT_METHOD(sampleMethod: (NSString *)certpath withCertpass: (NSString *)c
     if (!PKCS12_parse(p12, [certpass UTF8String], &pkey, &cert, &ca)) { //Error at parsing or password error
         fprintf(stderr, "Error parsing PKCS#12 file\n");
         ERR_print_errors_fp(stderr);
+        const char *errormessage = "Неверный пароль!";
+        BIO_free(dataforsign);
+        ERR_print_errors_fp(stderr);
+        //
+        ERR_remove_state(/* pid= */ 0);
+//        ENGINE_cleanup();
+        CONF_modules_unload(/* all= */ 1);
+        // //    EVP_cleanup();
+        //    ERR_free_strings();
+        CRYPTO_cleanup_all_ex_data();
+        NSLog(@"generate signature pkcs11 complete!!!");
+        
+        EVP_PKEY_free(pkey);
+        X509_free(cert);
+        ERR_free_strings();
+        errorcallback(@[[NSString stringWithUTF8String:errormessage]]);
+        return;
+        
     }
-
 
     //    tbio = BIO_new_file([certPaths UTF8String], "r");
     //    cert = PEM_read_bio_X509(tbio, NULL, 0, NULL);
@@ -168,9 +192,6 @@ RCT_EXPORT_METHOD(sampleMethod: (NSString *)certpath withCertpass: (NSString *)c
     /* Open content being signed */
 
 
-    BIO *dataforsign = BIO_new(BIO_s_mem()); //If you want input data not from fs
-    BIO_puts(dataforsign, inputData);
-    //    BIO_puts(data, inputData);
     
 
     /* Sign content */
@@ -208,7 +229,7 @@ RCT_EXPORT_METHOD(sampleMethod: (NSString *)certpath withCertpass: (NSString *)c
 
     //
     EVP_MD_CTX md_ctx;
-    const EVP_MD *md = NULL;
+    EVP_MD *md = NULL;
     int sig_len;
     //Algorithm
     int algnid = pkey->type;
@@ -261,11 +282,12 @@ RCT_EXPORT_METHOD(sampleMethod: (NSString *)certpath withCertpass: (NSString *)c
                                                   encoding:NSASCIIStringEncoding
                                                      error:NULL];
     // maybe for debugging...
+    
 //    NSLog(@"contents: %@", content);
     
     NSRange   searchedRange = NSMakeRange(0, [content length]);
     NSString *pattern = @"^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$";
-    NSError  *error = nil;
+ 
     
     NSRegularExpression* regex = [NSRegularExpression regularExpressionWithPattern: pattern   options:NSRegularExpressionAnchorsMatchLines error:&error];
     NSArray* matches = [regex matchesInString:content options:0 range: searchedRange];
@@ -326,41 +348,41 @@ RCT_EXPORT_METHOD(sampleMethod: (NSString *)certpath withCertpass: (NSString *)c
     memset(temp, 0, SIZE);
     time_t not_after_t = ASN1_GetTimeT(not_after);
     free(temp);
+    
 
     //Check certificate dates
     if(difftime(time(NULL), not_before_t) < 0) {
         NSLog(@"Certificate not_before problem");
-        goto errors;
+        goto errorlabels;
     } else if(difftime(time(NULL), not_after_t) > 0) {
         NSLog(@"Certificate valid period expired");
-        goto errors;
+        goto errorlabels;
     }
- 
+    
     
 
 
     NSLog(@"done");
 
-errors:
+errorlabels:
 
     CMS_ContentInfo_free(ci);
-
+//
     BIO_free(dataforsign);
     ERR_print_errors_fp(stderr);
-
+//
     ERR_remove_state(/* pid= */ 0);
-    ENGINE_cleanup();
+//    ENGINE_cleanup();
     CONF_modules_unload(/* all= */ 1);
-    EVP_cleanup();
-    ERR_free_strings();
+// //    EVP_cleanup();
+//    ERR_free_strings();
     CRYPTO_cleanup_all_ex_data();
     NSLog(@"generate signature pkcs11 complete!!!");
     
     EVP_PKEY_free(pkey);
     X509_free(cert);
-    EVP_MD_CTX_destroy(md_ctx);
     ERR_free_strings();
-    //EVP_cleanup(); //вызываем только, когда абсолютно все завершили
+//    EVP_cleanup(); //вызываем только, когда абсолютно все завершили
     //  callback(@[[NSNull null], [NSNumber numberWithInt:(1*2)]]);
     //callback(@[[NSNull null], [NSString stringWithUTF8String:pem], paths ]);
     NSString *result = [NSString stringWithString:signature];
